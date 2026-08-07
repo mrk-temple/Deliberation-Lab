@@ -1,0 +1,25 @@
+# 密钥 / 环境（绝不入库）
+.env
+.env.*
+!.env.example
+*.key
+
+# Python
+web/.venv/
+__pycache__/
+*.pyc
+
+# 本地数据
+web/council.db
+web/*.db
+multiagent-eval/results/*.log
+
+# 开发临时产物（个人截图等，不入库）
+problem/
+
+# 个人环境配置（路径/截图命令等，不入库）
+.claude/
+
+# 系统
+.DS_Store
+Thumbs.db

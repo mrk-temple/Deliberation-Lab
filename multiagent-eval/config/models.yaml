@@ -1,0 +1,51 @@
+# 后端模型配置 — GLM vs DeepSeek，两者都是 OpenAI 兼容接口
+# API key 从环境变量读取，不硬编码
+#
+# 注意：glm-5.2 和 deepseek-v4-pro 都是推理模型(reasoning model)，
+# 会先用 reasoning_tokens 思考再输出 content。
+# 因此 max_tokens 需要设得足够大（4096），否则 token 全用于推理、content 为空。
+#
+# Judge 用非推理模型 glm-4.5：评估任务不需要深度推理，
+# 非推理模型更快、不浪费 token、JSON 输出不会被截断。
+#
+# 环境变量来源：
+#   GLM_API_KEY / GLM_BASE_URL      → ~/.hermes/.env（智谱开放平台）
+#   DEEPSEEK_API_KEY / DEEPSEEK_BASE_URL → infoflow 仓库的 .env
+
+backends:
+
+  glm:
+    name: "GLM-5.2 (智谱)"
+    provider: openai_compatible
+    base_url_env: GLM_BASE_URL
+    base_url_default: "https://open.bigmodel.cn/api/paas/v4"
+    api_key_env: GLM_API_KEY
+    model: "glm-5.2"
+    temperature: 0.85
+    max_tokens: 4096    # 推理模型，需留足 reasoning + content 的空间
+
+  deepseek:
+    name: "DeepSeek-V4-Pro"
+    provider: openai_compatible
+    base_url_env: DEEPSEEK_BASE_URL
+    base_url_default: "https://api.deepseek.com"
+    api_key_env: DEEPSEEK_API_KEY
+    model: "deepseek-v4-pro"
+    temperature: 0.85
+    max_tokens: 4096    # 推理模型，同上
+
+  judge:
+    name: "DeepSeek-V4-Flash (Judge)"
+    provider: openai_compatible
+    base_url_env: DEEPSEEK_BASE_URL
+    base_url_default: "https://api.deepseek.com"
+    api_key_env: DEEPSEEK_API_KEY
+    model: "deepseek-v4-flash"
+    temperature: 0.3     # Judge 用低温度保证稳定性
+    max_tokens: 4096     # 推理模型，需留足空间
+
+# 评测时默认对比的后端列表（不含 judge）
+default_compare: [glm, deepseek]
+
+# Judge 用哪个后端
+judge_backend: judge

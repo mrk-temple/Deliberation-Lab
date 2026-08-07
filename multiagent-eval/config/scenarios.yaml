@@ -1,0 +1,284 @@
+# 评测场景定义 — 10个场景，覆盖个人抉择 / 多方辩论 / 复杂 trade-off 三类
+# 每个场景包含：描述、模式、参与角色、预期难点、成功标准、主要考察维度、多轮对话 turns
+# turns 中的 user 内容是用户发给系统的原始消息，pipeline 按顺序逐轮调用
+
+scenarios:
+
+  # ── A. 个人抉择类（solo，测深度与方法运用）──────────────────────
+
+  - id: career_pivot
+    title: 职业转型两难
+    category: personal_choice
+    mode: solo
+    persona_ids: [feynman]
+    description: >
+      30岁程序员，在大厂年薪50万，稳定但感觉自己做螺丝钉。收到前同事创业邀请，
+      薪资降到30万但有期权，方向是自己真正感兴趣的。有房贷月供1.2万，妻子刚怀孕。
+    task_goal: >
+      用第一性原理帮用户理清决策的真实代价和关键变量，不被"稳定""风险"这类
+      模糊概念绑架。
+    expected_difficulty: >
+      信息不足（创业成功率未知）、多变量权衡（家庭责任 vs 个人成长）、
+      恐惧伪装成理性分析。
+    success_criteria: >
+      拆解"稳定""风险"的真实含义而非甩"follow your heart"，落到用户具体处境，
+      给出一个具体的下一步。
+    primary_dimensions: [method_application, conclusion_actionability]
+    turns:
+      - user: >
+          我30岁，在大厂做程序员，年薪50万，工作稳定但感觉自己就是个螺丝钉，
+          每天重复一样的事。最近前同事拉我一起创业，做的是我真正感兴趣的方向
+          （AI应用），但薪资只有30万，说有期权但谁知道能不能变现。我有房贷月供
+          1.2万，老婆刚怀孕，明年初生孩子。我纠结了两个月了，理性告诉我该留在大厂，
+          但心里又觉得再不搏一把这辈子就定型了。
+      - user: >
+          但创业的风险太大了，90%的创业公司都活不过三年。万一失败了，我有老婆
+          孩子要养，房贷要还，到时候怎么办？
+      - user: >
+          你说的第一性原理，具体到我的情况，我应该怎么分析？我感觉自己一直在
+          '想'但分析不清楚。
+
+  - id: chronic_procrastination
+    title: 反复失败后的自我管理
+    category: personal_choice
+    mode: solo
+    persona_ids: [wangyangming]
+    description: >
+      大三学生，过去两年尝试番茄钟、冥想、打卡app、惩罚机制等十几种方法克服拖延，
+      每次坚持不到两周就放弃。已产生习得性无助，觉得"自己就是这种人"。
+      期末考试三周后，四门课没复习。
+    task_goal: >
+      王阳明需用知行合一拆解"知道但做不到"的真正卡点——不是缺方法，
+      而是"知"与"行"之间的断裂。
+    expected_difficulty: >
+      用户已形成"我做不到"的固化自我认知，方法本身不是问题（试过十几种），
+      需触及意志/心理层面而非再给工具清单。
+    success_criteria: >
+      不再给新方法清单，而是拆解"知道"和"做到"之间的断裂，
+      给出一个具体的第一步行动。
+    primary_dimensions: [method_application, long_range_consistency]
+    turns:
+      - user: >
+          我是大三学生，拖延症特别严重。过去两年我试了番茄钟、冥想、Forest打卡、
+          惩罚机制、找监督伙伴……十几种方法，每次坚持不到两周就放弃。现在期末考试
+          三周后就到了，四门课一点没复习，但我还是忍不住刷手机到凌晨。我觉得自己
+          可能就是这种人，没救了。
+      - user: >
+          你的意思是我不该再找新方法了？但我现在什么方法都没有，不找方法我怎么办？
+          总不能什么都不做吧。
+      - user: >
+          你说的'知而不行只是未知'，但我明明知道该复习，为什么还是做不到？
+          这个'知'到底缺了什么？
+
+  - id: long_term_vs_short_term
+    title: 长期目标与短期诱惑的多阶段决策
+    category: personal_choice
+    mode: solo
+    persona_ids: [naval]
+    description: >
+      用户立志3年内实现财务自由，正在执行自律计划。面临连续三个阶段诱惑：
+      阶段A（现在）朋友邀约合伙赚快钱但偏离主方向；阶段B（3个月后）计划遇瓶颈想放弃；
+      阶段C（1年后）小有成就但收到大厂高薪offer。专为测试长程一致性设计。
+    task_goal: >
+      测试纳瓦尔在三个阶段给出的建议是否前后逻辑一致——是否 A 阶段说"坚持长期主义"、
+      C 阶段却说"接受现实"。
+    expected_difficulty: >
+      每个阶段都有看似合理的放弃理由，模型容易在压力下动摇长期框架。
+    success_criteria: >
+      三个阶段的建议逻辑自洽，不因短期困难或阶段性成功动摇长期框架，
+      且能解释为什么看似该动摇实则不该。
+    primary_dimensions: [long_range_consistency]
+    turns:
+      - user: >
+          我给自己定了一个3年计划，目标是靠个人技能和内容创作实现财务自由，
+          不再出卖时间。现在是第1个月，我在严格执行。但一个好朋友找我合伙做
+          电商代运营，说半年能赚到我现在的年薪，但会占用我大部分精力，跟我的
+          3年计划方向完全不同。他说机会不等人，我现在很犹豫。
+      - user: >
+          [3个月后] 我执行计划三个月了，但几乎看不到进展。粉丝没涨几个，
+          收入为零，身边的人都说我在做梦。我开始怀疑自己是不是太理想主义了。
+          要不要先回去找个工作，把计划当副业慢慢做？
+      - user: >
+          [1年后] 终于有起色了！我的内容开始有稳定流量，月收入能覆盖生活费了。
+          但这时候一个一线大厂给我发了offer，年薪80万，是我现在收入的8倍。
+          去的话基本没时间做自己的事了，但这个钱太诱人了。你觉得呢？
+
+  # ── B. 多方辩论类（roundtable，测 pushback 与分歧质量）──────────
+
+  - id: moral_gray_zone
+    title: 道德灰色地带
+    category: multi_party_debate
+    mode: roundtable
+    persona_ids: [socrates, marcus-aurelius, maozedong]
+    description: >
+      用户是公司中层，发现直属上级在汇报数据上做轻微美化（不违法但误导投资者）。
+      上级对用户有知遇之恩。举报可能毁掉上级和自己，不举报则违背良心且日后可能被牵连。
+    task_goal: >
+      三方应从不同角度给出截然不同的判断并互相反驳——苏格拉底诘问"什么是正确"、
+      马可奥勒留论斯多葛责任、毛泽东论斗争与站队。
+    expected_difficulty: >
+      无完美答案，情感（感恩）与原则冲突，用户可能在用"不想伤害恩人"
+      回避自己的利益考量。
+    success_criteria: >
+      三方有真实分歧而非和谐，pushback 到用户的回避——
+      "不想伤害他"背后是否有自我保护的算计。
+    primary_dimensions: [pushback_intensity, role_consistency]
+    turns:
+      - user: >
+          我是某公司的中层，最近发现我的直属上级——也是一路提拔我的恩师——
+          在给董事会的汇报里美化数据。不算造假，但明显把不好看的数字藏了、
+          把好看的放大了。不违法，但会误导投资者的判断。我很纠结：举报的话，
+          恩师的职业生涯可能完了，我也可能被穿小鞋甚至走人；不举报的话，
+          我心里过不去，而且万一以后东窗事发，我作为知情者也可能被牵连。
+          我不知道该怎么办。
+
+  - id: scarce_resource_tradeoff
+    title: 资源极度有限下的残酷取舍
+    category: complex_tradeoff
+    mode: roundtable
+    persona_ids: [feynman, zhuangzi, maozedong]
+    description: >
+      单亲妈妈月薪8000，同时面临：母亲重病每月需5000医药费、孩子要上兴趣班
+      （年费2万）、自己身体出问题需休息治疗。三件事只能保一件，另外两件必须放弃。
+    task_goal: >
+      逼出真正的优先级判断——费曼用实证拆解到底需要什么、庄子说放下哪些执念、
+      毛泽东抓主要矛盾。
+    expected_difficulty: >
+      每个选择都有道德代价，没有"正确答案"，极易和稀泥说"都要"。
+    success_criteria: >
+      给出明确的取舍逻辑和具体行动方案，不回避、不和稀泥，承认放弃的代价。
+    primary_dimensions: [conclusion_actionability, pushback_intensity]
+    turns:
+      - user: >
+          我是个单亲妈妈，月薪8000。现在三件事同时砸过来：我妈查出重病，
+          每月医药费要5000；孩子明年要上小学，我想给他报个兴趣班免得落后，
+          年费2万；我自己最近身体一直不舒服，医生说再不调理会出大问题，
+          需要休息加治疗。但我钱就这么多，时间精力也就这么多。三件事我感觉
+          只能保住一件，另外两件必须放弃。可每一件放弃我都觉得天塌了。
+
+  - id: public_stance_vs_private_interest
+    title: 公开立场与私人利益冲突
+    category: multi_party_debate
+    mode: roundtable
+    persona_ids: [marcus-aurelius, naval, maozedong]
+    description: >
+      用户是某行业KOL，发现行业内普遍存在的不道德行为（不违法）。公开揭露会推动
+      行业改善，但会得罪整个行业人脉、失去多个商业合作、可能被集体封杀。
+      沉默则行为继续伤害消费者。
+    task_goal: >
+      三方应给出截然不同立场——马可奥勒留论德性责任高于个人利益、纳瓦尔论
+      长期利益最大化、毛泽东论斗争策略与是否值得。
+    expected_difficulty: >
+      理想主义与现实代价的真实冲突，容易一边倒劝"勇敢"或一边倒劝"明哲保身"。
+    success_criteria: >
+      真实呈现不同立场的代价，不一刀切，pushback 到用户"要不要发声"背后
+      真正在怕什么。
+    primary_dimensions: [role_consistency, pushback_intensity]
+    turns:
+      - user: >
+          我是某行业的KOL，粉丝不算多但有一点影响力。最近我发现行业里一个很普遍
+          的操作——不算违法，但明显在坑消费者，很多人被坑了但不知道。我想公开揭露，
+          但代价很大：这个行业圈子很小，我揭露了基本等于得罪整个行业的人脉，
+          几个商业合作肯定黄了，还可能被集体封杀围攻。但不揭露的话，这个事还会
+          继续坑人。我该怎么选？
+
+  # ── C. 复杂 trade-off（council，测结论可执行性）─────────────────
+
+  - id: power_and_responsibility
+    title: 权力与责任
+    category: complex_tradeoff
+    mode: council
+    persona_ids: [maozedong, marcus-aurelius, wangyangming]
+    description: >
+      用户刚升任部门负责人，接手效率低下的团队。需裁员30%才能保住部门，
+      但被裁的人里有跟着自己多年的老同事。不裁则整个部门半年后可能被撤销。
+    task_goal: >
+      抉择模式给可落地的综合判断——毛泽东抓战略主要矛盾、马可奥勒留论责任与承受、
+      王阳明致良知与知行合一。
+    expected_difficulty: >
+      短期人情与长期存亡的冲突，决策的心理负担极重。
+    success_criteria: >
+      给出明确的下一步 + 点破真正的取舍 + 一个静坐问题，
+      不回避裁员的残酷性。
+    primary_dimensions: [conclusion_actionability, pushback_intensity]
+    turns:
+      - user: >
+          我刚升任部门负责人，接手了一个效率很低的团队，20个人。领导跟我交底：
+          要么半年内把效率提上去，要么整个部门可能被裁撤。我看了一圈，要提效率
+          必须裁掉至少30%的人，也就是6个人，精简后重整。但这6个人里有3个是跟我
+          一起入职、一起加班熬过来的老同事。他们能力确实跟不上，但裁掉他们我觉得
+          自己像个叛徒。不裁的话，整个部门20个人半年后可能一起完蛋。
+
+  - id: decision_under_uncertainty
+    title: 信息严重不足下的决策
+    category: complex_tradeoff
+    mode: council
+    persona_ids: [feynman, socrates, yijing]
+    description: >
+      用户的父亲确诊罕见病。医生给出两个方案：A风险高但可能根治，B保守治疗维持现状。
+      两个方案成功率都不确定（医生说"看个体差异"）。必须两周内决定。
+    task_goal: >
+      在不确定性下帮用户建立决策框架——费曼实证拆解哪些是真知道哪些是猜、
+      苏格拉底诘问"根治""维持"的真实含义、易经面对不确定性的象数思维。
+    expected_difficulty: >
+      信息不足、至亲的情感卷入、时间压力，理性与术数人物能否各展其能而不冲突。
+    success_criteria: >
+      理性人物和术数人物各展其能且不互相否定，给出可操作的决策框架而非空泛安慰。
+    primary_dimensions: [role_consistency, conclusion_actionability]
+    turns:
+      - user: >
+          我爸确诊了一种罕见病。医生给了两个方案：方案A是手术，风险高，但成功的
+          话有可能根治；方案B是保守治疗，维持现状，生活质量有保障但不会好转，
+          可能缓慢恶化。两个方案的成功率医生都说不好，说'看个体差异'。我查了资料，
+          数据很少，基本没有明确结论。医生让我两周内做决定。我完全不知道该怎么选，
+          每选一个都怕选错。
+
+  - id: workplace_faction
+    title: 复杂人际关系中的站队
+    category: complex_tradeoff
+    mode: council
+    persona_ids: [kongzi, jung, sushi, socrates]
+    description: >
+      用户在职场夹在两个高层派系斗争之间。A派是用户的提拔者但方向可能有问题，
+      B派方向对但手段激进。不站队会被两边边缘化，站任何一边都有代价。
+    task_goal: >
+      帮用户在复杂人际中找到自己的立场——孔子论群体伦理与名分、荣格论个体化与
+      无意识动机、苏轼超然豁达、苏格拉底诘问"站队"本身。
+    expected_difficulty: >
+      多方利益缠绕无完美答案，极易和稀泥。
+    success_criteria: >
+      各方有真实分歧，最终给出可落地的立场建议而非"两边都不得罪"的废话。
+    primary_dimensions: [conclusion_actionability, pushback_intensity]
+    turns:
+      - user: >
+          我在公司夹在两个高层的派系斗争中间。A派是我的老领导，一路提拔我，
+          但他最近主推的项目方向我有疑虑，觉得可能会出问题。B派的人方向我觉得
+          是对的，但做事手段比较激进，而且之前跟我老领导有过节。我不站队的话，
+          两边都觉得我不是自己人，会被边缘化；站A的话，万一项目出事我跟着背锅；
+          站B的话，等于背叛老领导，而且B派未必真能赢。我每天上班都如履薄冰。
+
+  - id: values_collision
+    title: 价值观深度碰撞
+    category: complex_tradeoff
+    mode: council
+    persona_ids: [nietzsche, kongzi, naval]
+    description: >
+      用户25岁，面临父母强烈催婚。父母传统观念（成家立业、传宗接代），用户崇尚
+      个人自由和自我实现，认为婚姻不应将就。但用户也感到孤独，不确定自己是真追求
+      自由还是在逃避亲密关系。
+    task_goal: >
+      三方呈现根本性价值观碰撞——尼采重估一切价值不盲从群体、孔子论群体伦理与
+      家庭责任、纳瓦尔论个人杠杆与自由。
+    expected_difficulty: >
+      传统文化与个人主义的根本冲突，且用户自身有矛盾
+      （追求自由 vs 逃避亲密关系）。
+    success_criteria: >
+      三方真实碰撞不和谐，pushback 到用户"追求自由"可能是在逃避亲密关系。
+    primary_dimensions: [role_consistency, pushback_intensity]
+    turns:
+      - user: >
+          我25岁，父母疯狂催婚。他们是传统观念，觉得到了年纪就该结婚生子，
+          不断给我安排相亲。但我崇尚个人自由和自我实现，觉得婚姻不该将就，
+          不想为了结婚而结婚。可说实话，我有时候也会觉得孤独，特别是看到朋友们
+          一个个成家。我不确定自己到底是真在追求自由，还是其实是在逃避亲密关系、
+          逃避被拒绝的可能。

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>解惑议事厅</title>
+  <!-- PWA：可安装为独立窗口应用（装好后从 manifest 的 start_url 进工作台形态） -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#17150F" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="议事厅" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif+SC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- ══ 首页：横向展厅 ══ -->
+  <header class="hm-header" id="hmHeader">
+    <div class="hm-bar">
+      <span class="hm-spacer" aria-hidden="true">▏ 解惑 ▏ N° 00–15</span>
+      <a class="hm-brand" href="#hm-top"><span class="seal" aria-hidden="true">議</span><span class="wm">解惑议事厅</span><span class="en">CONSILIVM</span></a>
+      <button class="menu-trigger" id="menuOpen" aria-haspopup="true">[ ☰ MENU ]</button>
+    </div>
+  </header>
+
+  <div id="home">
+    <!-- 暗场英雄 -->
+    <section class="hm-hero" id="hm-top">
+      <div class="wrap hm-hero-grid">
+        <div class="hm-hero-copy">
+          <div class="landing-seal">議</div>
+          <span class="eyebrow">古今中外 · the council of minds</span>
+          <h1 class="hm-title">迷茫时，<br>请智者为你<em>看通</em></h1>
+          <p class="hm-sub">独对　·　圆桌　·　抉择</p>
+          <div class="ornament wide"><span>◆</span></div>
+          <p class="hm-lede">把心里那件想不通的事，交给古今中外的智者——他们各抒己见、彼此争辩，为你看通看透。</p>
+          <button id="enterBtn" class="landing-enter">入　厅</button>
+          <p class="hm-hint" aria-hidden="true">scroll ↓ 览群贤 <span class="cursor"></span></p>
+        </div>
+        <div class="hm-hero-art">
+          <pre class="hero-ascii" id="homeAscii" aria-hidden="true"></pre>
+          <span class="seal art-seal" aria-hidden="true">空</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 横向展厅 -->
+    <section class="hm-gallery" id="hm-gallery">
+      <div class="wrap hm-gallery-head">
+        <div><span class="eyebrow">群贤 · 列位智者</span><h2>逛展 · 择一请教</h2></div>
+        <div class="hm-arrows">
+          <button id="galPrev" class="gal-arrow" aria-label="上一位">←</button>
+          <button id="galNext" class="gal-arrow" aria-label="下一位">→</button>
+        </div>
+      </div>
+      <div class="hm-track" id="sageTrack" tabindex="0" aria-label="智者横向画廊"></div>
+      <div class="wrap progress" aria-hidden="true">
+        <span>├</span><span class="track"><span class="dot" id="hmDot"></span></span><span class="end">┤</span>
+      </div>
+    </section>
+
+    <!-- 纸层：三种问道 -->
+    <section class="hm-band">
+      <div class="wrap">
+        <div class="cjk">如墨之静　·　如线之雅</div>
+        <p>三种问道：独对深谈　·　圆桌争鸣　·　抉择落地</p>
+      </div>
+    </section>
+
+    <footer class="hm-foot">
+      <div class="wrap">
+        <div class="hm-foot-frame" aria-hidden="true">╔══════════════════════════════════════════════════╗</div>
+        <div class="hm-foot-bot">
+          <span class="wm">解惑议事厅 · CONSILIVM</span>
+          <span class="seal" aria-hidden="true">議</span>
+          <small>crafted as quiet as ink <span class="cursor"></span></small>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 纵向全屏菜单 -->
+  <div class="hm-menu" id="homeMenu" role="dialog" aria-modal="true" aria-label="主菜单">
+    <button class="menu-close" id="menuClose">[ ✕ CLOSE ]</button>
+    <nav class="hm-menu-list">
+      <a class="hm-menu-item" href="#hm-gallery"><span class="no">01</span><span class="cn">群贤</span><span class="en">The Council</span></a>
+      <a class="hm-menu-item" href="#hm-band"><span class="no">02</span><span class="cn">问道</span><span class="en">Three Ways</span></a>
+      <a class="hm-menu-item" href="#" id="menuEnter"><span class="no">03</span><span class="cn">入厅</span><span class="en">Enter the Hall</span></a>
+    </nav>
+    <p class="hm-menu-foot">解惑议事厅 ── crafted as quiet as ink</p>
+  </div>
+
+  <button id="menuBtn" class="menu-btn" title="菜单">☰</button>
+
+  <div class="app">
+    <!-- 侧栏 -->
+    <aside class="sidebar">
+      <div class="brand" id="backHome" title="返回展厅">
+        <div class="brand-seal">議</div>
+        <div class="brand-text">
+          <h1>解惑议事厅</h1>
+          <p class="brand-latin">← 返回展厅 · CONSILIVM</p>
+          <p>迷茫时，请古今智者为你看通看透</p>
+        </div>
+      </div>
+
+      <div class="modes">
+        <button class="mode active" data-mode="roundtable">
+          <span class="mode-cn">圆桌</span><span class="mode-en">众智争鸣</span>
+        </button>
+        <button class="mode" data-mode="solo">
+          <span class="mode-cn">独对</span><span class="mode-en">单独请教</span>
+        </button>
+        <button class="mode" data-mode="council">
+          <span class="mode-cn">抉择</span><span class="mode-en">给我决断</span>
+        </button>
+      </div>
+
+      <div class="roster-head">
+        <span id="rosterHint">入席的智者</span>
+        <button id="suggestBtn" class="link-btn" title="根据你的困惑自动选人">为我择贤</button>
+      </div>
+      <div id="roster" class="roster"><!-- personas injected --></div>
+
+      <div class="history-head">近日所思</div>
+      <div id="history" class="history"></div>
+
+      <div class="foot" id="modelTag"></div>
+    </aside>
+
+    <!-- 主厅 -->
+    <main class="hall">
+      <div id="thread" class="thread">
+        <div class="empty" id="empty">
+          <div class="empty-seal">問</div>
+          <h2>把心里那件想不通的事，说给他们听</h2>
+          <p class="empty-latin">Ask, and the wise shall answer</p>
+          <div class="ornament"><span>◆</span></div>
+          <p id="emptyHint">已为「圆桌」模式——选几位智者入席，他们会各抒己见、彼此争辩，最后由书记官为你点透。</p>
+        </div>
+      </div>
+
+      <div class="composer">
+        <div id="selectedBar" class="selected-bar"></div>
+        <div id="divBar" class="div-bar"></div>
+        <div class="composer-row">
+          <textarea id="input" rows="1" placeholder="说说最近想不通的事……（⏎ 发送）"></textarea>
+          <button id="sendBtn" class="send">请教</button>
+        </div>
+        <div class="composer-foot">
+          <button id="exportBtn" class="ghost" disabled>沉淀进 Obsidian</button>
+          <button id="newBtn" class="ghost">新的一桌</button>
+          <select id="modelSel" class="ghost model-sel" title="选用模型">
+            <option value="">模型 · 自动</option>
+            <option value="deepseek-v4-pro">DeepSeek V4 Pro</option>
+          </select>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 智者详情面板 -->
+  <div id="detail" class="detail-overlay">
+    <div class="detail-card">
+      <button id="detailClose" class="detail-close" title="关闭">×</button>
+      <div id="detailBody" class="detail-body"></div>
+    </div>
+  </div>
+
+  <!-- 我的体悟（导出前） -->
+  <div id="reflect" class="detail-overlay">
+    <div class="detail-card reflect-card">
+      <div class="reflect-head">沉淀这一席</div>
+      <p class="reflect-sub">写下你此刻看通看透之处（可留空），将一并写入 Obsidian 笔记。</p>
+      <textarea id="reflectText" rows="4" placeholder="我的体悟……"></textarea>
+      <div class="reflect-foot">
+        <button id="reflectSkip" class="ghost">跳过，直接存</button>
+        <button id="reflectSave" class="send">存入 Obsidian</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="/app.js"></script>
+  <script>
+    // 注册 Service Worker —— PWA 可安装 + 离线外壳（策略见 sw.js，network-first 不吃旧缓存）
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+    }
+  </script>
+</body>
+</html>

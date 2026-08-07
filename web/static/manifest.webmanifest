@@ -1,0 +1,19 @@
+{
+  "name": "解惑议事厅",
+  "short_name": "议事厅",
+  "description": "迷茫时，请古今中外的智者为你看通看透。独对 · 圆桌 · 抉择。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "/?surface=desktop",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#17150F",
+  "theme_color": "#17150F",
+  "categories": ["productivity", "lifestyle", "education"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
