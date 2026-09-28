@@ -22,7 +22,7 @@ from pipeline import run_eval  # noqa: E402
 
 def main():
     parser = argparse.ArgumentParser(
-        description="解惑议事厅 · 多智能体决策评测"
+        description="Deliberation-Lab · 多智能体决策评测"
     )
     parser.add_argument(
         "--scenario", "-s", default=None,
@@ -35,7 +35,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 60)
-    print("解惑议事厅 · 多智能体决策评测")
+    print("Deliberation-Lab · 多智能体决策评测")
     print("=" * 60)
     if args.scenario:
         print(f"场景过滤: {args.scenario}")

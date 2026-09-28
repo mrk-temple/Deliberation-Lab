@@ -1,4 +1,4 @@
-"""解惑议事厅 · FastAPI 后端。"""
+"""Deliberation-Lab · FastAPI 后端。"""
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -14,7 +14,7 @@ import orchestrator
 import store
 from config import CONFIG
 
-app = FastAPI(title="解惑议事厅")
+app = FastAPI(title="Deliberation-Lab")
 store.init_db()
 
 STATIC = Path(__file__).parent / "static"

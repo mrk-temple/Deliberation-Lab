@@ -1,4 +1,4 @@
-/* 解惑议事厅 · Service Worker
+/* Deliberation-Lab · Service Worker
  * 目的：满足 PWA「可安装」（需注册带 fetch 处理的 SW）+ 离线时给一个外壳。
  * 策略：network-first（先网络、失败回退缓存）——刻意不做 cache-first，
  * 免得改了 app.js/style.css 后吃旧缓存（开发期那个老坑）。/api/* 一律直连不缓存。

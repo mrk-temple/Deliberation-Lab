@@ -1,4 +1,4 @@
-// 解惑议事厅 · 前端
+// Deliberation-Lab · 前端
 const $ = s => document.querySelector(s);
 const CAT = {
   east:    {label:"东方哲思", color:"var(--jade)"},

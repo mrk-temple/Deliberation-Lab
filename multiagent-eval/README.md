@@ -1,15 +1,15 @@
 # 多智能体决策评测与能力分析框架
 
-> 基于「解惑议事厅」多智能体决策系统，设计并实现一套轻量但完整的评测与能力分析框架。
+> 基于 Deliberation-Lab 多智能体决策系统，设计并实现一套轻量但完整的评测与能力分析框架。
 > 形成「任务设计 → 数据构造 → 自动化评测 → Badcase 挖掘 → 回流优化」的闭环。
 
 ## 项目简介
 
-解惑议事厅是一个"迷茫时请古今中外智者解惑"的多智能体系统，15 位智者（老子、庄子、
+Deliberation-Lab 是一个"迷茫时请古今中外智者解惑"的多智能体系统，15 位智者（老子、庄子、
 孔子、苏格拉底、费曼、毛泽东等）各有结构化"灵魂档案"，支持独对 / 圆桌 / 抉择三种
 对话模式。
 
-本框架对解惑议事厅进行系统性评测：
+本框架对 Deliberation-Lab 进行系统性评测：
 - 设计 10 个高质量决策评测场景（个人抉择、多方辩论、复杂 trade-off）
 - 定义 5 个核心评测维度（角色一致性、Pushback 力度、结论可执行性、长程一致性、方法运用度）
 - 实现自动化 Judge 与 Trace 采集 Pipeline
@@ -106,7 +106,7 @@ python scripts/analyze_badcases.py            # 分析 Badcase 并生成报告
 | GLM | glm-5.2 | 智谱开放平台 OpenAI 兼容 |
 | DeepSeek | deepseek-v4-pro | DeepSeek API OpenAI 兼容 |
 
-两者都走 OpenAI 兼容接口，通过上下文管理器在运行时切换，不改动解惑议事厅现有代码。
+两者都走 OpenAI 兼容接口，通过上下文管理器在运行时切换，不改动 Deliberation-Lab 现有代码。
 
 ## 结果说明
 
@@ -118,7 +118,7 @@ python scripts/analyze_badcases.py            # 分析 Badcase 并生成报告
 
 详细设计决策见 [DESIGN.md](./DESIGN.md)。
 
-## 与解惑议事厅的关系
+## 与 Deliberation-Lab 的关系
 
-本框架直接 import 解惑议事厅的 `orchestrator`、`personas`、`llm` 模块，
-复用其编排逻辑和人物库，不重复造轮子。评测的最终目的是服务解惑议事厅的优化。
+本框架直接 import Deliberation-Lab 的 `orchestrator`、`personas`、`llm` 模块，
+复用其编排逻辑和人物库，不重复造轮子。评测的最终目的是服务 Deliberation-Lab 的优化。

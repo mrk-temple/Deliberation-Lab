@@ -1,4 +1,4 @@
-# 解惑议事厅 · 交接文档（给新的 Claude Code 会话）
+# Deliberation-Lab · 交接文档（给新的 Claude Code 会话）
 
 > 新会话第一步：读 `DESIGN.md`、本文件。
 > 一句话：这是一个"迷茫时请古今中外智者解惑"的平台，两种交付共用同一套人物库；
@@ -13,7 +13,7 @@
 ## 怎么跑
 ```bash
 # Web（开发）：必须从 web/ 起，相对路径才对
-cd 解惑议事厅/web && ./run.sh            # 建 venv 装依赖后 uvicorn :8787
+cd Deliberation-Lab/web && ./run.sh            # 建 venv 装依赖后 uvicorn :8787
 # 打开 http://127.0.0.1:8787
 ```
 - **本机 curl 测 localhost 要加 `--noproxy '*'`**（有代理拦截）。
@@ -53,7 +53,7 @@ cd 解惑议事厅/web && ./run.sh            # 建 venv 装依赖后 uvicorn :8
 
 ## 注意 / 历史包袱
 - 松烟 Songyan 茶站样板（`apps/`、`packages/`、`index.html`、`BUILD-PROMPT.md`、`design-system.md`）已删除——
-  它是另一个产品，与解惑议事厅无关；视觉规范现以 `web/static/style.css` 为准。
+  它是另一个产品，与 Deliberation-Lab 无关；视觉规范现以 `web/static/style.css` 为准。
 - `.gitignore` 已忽略 `.env/.venv/council.db`；自用、不开源 key。
 - `web/run.sh` 会在 `web/.env` 缺失时复用 infoflow 仓库的 DeepSeek key。
 

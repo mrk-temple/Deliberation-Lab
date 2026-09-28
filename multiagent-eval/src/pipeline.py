@@ -1,7 +1,7 @@
 """主评测流水线：加载场景 → 切换后端 → 调用 orchestrator → 采集 Trace → Judge 打分 → 存储。
 
 后端切换通过上下文管理器 patch llm 模块的全局变量（_client/_S/_PROVIDER），
-不改动解惑议事厅现有代码。GLM 和 DeepSeek 都走 OpenAI 兼容接口。
+不改动 Deliberation-Lab 现有代码。GLM 和 DeepSeek 都走 OpenAI 兼容接口。
 """
 from __future__ import annotations
 
@@ -21,14 +21,14 @@ from openai import AsyncOpenAI
 # ── 路径设置 ────────────────────────────────────────────────────
 SRC_DIR = Path(__file__).resolve().parent          # multiagent-eval/src/
 EVAL_ROOT = SRC_DIR.parent                          # multiagent-eval/
-REPO_ROOT = EVAL_ROOT.parent                        # 解惑议事厅/
+REPO_ROOT = EVAL_ROOT.parent                        # Deliberation-Lab/
 WEB_DIR = REPO_ROOT / "web"
 
 # src/ 自身（for trace, judge）+ web/（for orchestrator, personas, llm, config）
 sys.path.insert(0, str(SRC_DIR))
 sys.path.insert(0, str(WEB_DIR))
 
-# 现在可以 import 解惑议事厅的模块了
+# 现在可以 import Deliberation-Lab 的模块了
 import orchestrator        # noqa: E402
 import personas            # noqa: E402
 import llm                 # noqa: E402
