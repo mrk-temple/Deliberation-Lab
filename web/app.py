@@ -1,6 +1,7 @@
 """Deliberation-Lab · FastAPI 后端。"""
 from __future__ import annotations
 import json
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -12,7 +13,6 @@ import llm
 import personas
 import orchestrator
 import store
-from config import CONFIG
 
 app = FastAPI(title="Deliberation-Lab")
 store.init_db()
@@ -25,7 +25,6 @@ class ChatReq(BaseModel):
     persona_ids: list[str]
     messages: list[dict]  # [{role, content, speaker?}]
     divination: str = ""  # 起卦/抽牌结果，注入术数人物上下文
-    model: str = ""       # 前端模型覆盖：""=自动(用 config.yaml 的 llm.model) | deepseek-v4-pro
     target_id: str = ""   # 圆桌追问轮：只让这一位回应（空=全员）
 
 
@@ -52,7 +51,7 @@ class ExportReq(BaseModel):
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "llm_configured": llm.configured(), "model": llm.model_label()}
+    return {"ok": True, "llm_configured": llm.configured()}
 
 
 @app.get("/api/personas")
@@ -70,7 +69,7 @@ def persona_detail(pid: str):
 
 @app.post("/api/suggest")
 async def suggest(req: SuggestReq):
-    raw = await orchestrator.suggest(req.question, CONFIG.get("llm", {}).get("model", "deepseek-v4-pro"))
+    raw = await orchestrator.suggest(req.question, llm.model_label())
     # 容错解析 JSON
     try:
         s = raw[raw.index("{"): raw.rindex("}") + 1]
@@ -79,16 +78,9 @@ async def suggest(req: SuggestReq):
         return {"picks": [], "raw": raw}
 
 
-def _pick_model(mode: str, override: str) -> str:
-    """前端指定优先；否则用配置的默认模型。"""
-    if override:
-        return override
-    return CONFIG.get("llm", {}).get("model", "deepseek-v4-pro")
-
-
 async def _sse(req: ChatReq):
     try:
-        model = _pick_model(req.mode, req.model.strip())
+        model = llm.model_label()
         if req.mode == "solo":
             gen = orchestrator.solo(req.persona_ids[0], req.messages, req.divination, model)
         elif req.mode == "council":
@@ -99,7 +91,9 @@ async def _sse(req: ChatReq):
             ev.pop("_full", None)  # 内部字段不外发
             yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
     except Exception as e:  # 把错误也通过 SSE 告诉前端
-        yield f"data: {json.dumps({'type':'error','message':str(e)}, ensure_ascii=False)}\n\n"
+        logging.getLogger('council.api').warning('Discussion failed: %s', type(e).__name__)
+        message = '议事服务暂时不可用，请稍后重试。' if llm.configured() else '尚未配置议事服务，请检查本地环境配置。'
+        yield f"data: {json.dumps({'type':'error','message':message}, ensure_ascii=False)}\n\n"
 
 
 @app.post("/api/chat")
@@ -126,7 +120,7 @@ def session_save(req: SaveReq):
 
 @app.post("/api/export")
 async def export(req: ExportReq):
-    model = CONFIG.get("llm", {}).get("model", "deepseek-v4-pro")
+    model = llm.model_label()
     distilled = await orchestrator.distill(req.mode, req.messages, req.persona_ids, model)
     path = store.export_to_obsidian(
         req.mode, req.title, req.messages, req.persona_ids, req.reflection, distilled
@@ -148,7 +142,19 @@ def session(sid: int):
 
 @app.get("/")
 def index():
-    return FileResponse(STATIC / "index.html")
+    return FileResponse(STATIC / "index.html", headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/app.js")
+def frontend_script():
+    return FileResponse(STATIC / "app.js", media_type="application/javascript",
+                        headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/style.css")
+def frontend_styles():
+    return FileResponse(STATIC / "style.css", media_type="text/css",
+                        headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/manifest.webmanifest")

@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif+SC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/style.css?v=20261105" />
 </head>
 <body>
   <!-- ══ 首页：横向展厅 ══ -->
@@ -63,7 +63,7 @@
     </section>
 
     <!-- 纸层：三种问道 -->
-    <section class="hm-band">
+    <section class="hm-band" id="hm-band">
       <div class="wrap">
         <div class="cjk">如墨之静　·　如线之雅</div>
         <p>三种问道：独对深谈　·　圆桌争鸣　·　抉择落地</p>
@@ -93,11 +93,11 @@
     <p class="hm-menu-foot">Deliberation-Lab ── crafted as quiet as ink</p>
   </div>
 
-  <button id="menuBtn" class="menu-btn" title="菜单">☰</button>
+  <button id="menuBtn" class="menu-btn" title="菜单" aria-label="角色与历史" aria-expanded="false" aria-controls="discussion-sidebar">☰</button>
 
   <div class="app">
     <!-- 侧栏 -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="discussion-sidebar">
       <div class="brand" id="backHome" title="返回展厅">
         <div class="brand-seal">議</div>
         <div class="brand-text">
@@ -107,7 +107,8 @@
         </div>
       </div>
 
-      <div class="modes">
+      <p class="sidebar-kicker">01 / 选择讨论方式</p>
+      <div class="modes" aria-label="讨论方式">
         <button class="mode active" data-mode="roundtable">
           <span class="mode-cn">圆桌</span><span class="mode-en">众智争鸣</span>
         </button>
@@ -120,19 +121,21 @@
       </div>
 
       <div class="roster-head">
-        <span id="rosterHint">入席的智者</span>
+        <span id="rosterHint">02 / 入席的智者</span>
         <button id="suggestBtn" class="link-btn" title="根据你的困惑自动选人">为我择贤</button>
       </div>
+      <input id="rosterSearch" class="roster-search" type="search" aria-label="搜索智者名字或流派" placeholder="搜索名字或流派…" autocomplete="off">
       <div id="roster" class="roster"><!-- personas injected --></div>
 
-      <div class="history-head">近日所思</div>
+      <div class="history-head">03 / 近日所思</div>
       <div id="history" class="history"></div>
 
-      <div class="foot" id="modelTag"></div>
+      <div class="foot" id="serviceTag"></div>
     </aside>
 
     <!-- 主厅 -->
     <main class="hall">
+      <div class="hall-topbar"><div><span>DELIBERATION / DISCUSSION</span><strong>讨论工作台</strong></div><p>选择视角，提出问题，留下值得继续思考的分歧。</p></div>
       <div id="thread" class="thread">
         <div class="empty" id="empty">
           <div class="empty-seal">問</div>
@@ -144,19 +147,17 @@
       </div>
 
       <div class="composer">
-        <div id="selectedBar" class="selected-bar"></div>
+        <div class="composer-intro"><span>04 / 提出困惑</span><small>把问题说具体，智者才能从不同立场回应。</small></div>
+        <div id="connectionStatus" class="connection-status" role="status" aria-live="polite"></div>
+        <div id="saveStatus" class="save-status" role="status" aria-live="polite" hidden></div><div id="selectedBar" class="selected-bar"></div>
         <div id="divBar" class="div-bar"></div>
         <div class="composer-row">
-          <textarea id="input" rows="1" placeholder="说说最近想不通的事……（⏎ 发送）"></textarea>
+          <textarea id="input" rows="1" aria-label="输入想讨论的问题" placeholder="说说最近想不通的事……（⏎ 发送）"></textarea>
           <button id="sendBtn" class="send">请教</button>
         </div>
         <div class="composer-foot">
           <button id="exportBtn" class="ghost" disabled>沉淀进 Obsidian</button>
-          <button id="newBtn" class="ghost">新的一桌</button>
-          <select id="modelSel" class="ghost model-sel" title="选用模型">
-            <option value="">模型 · 自动</option>
-            <option value="deepseek-v4-pro">DeepSeek V4 Pro</option>
-          </select>
+          <button id="newBtn" class="ghost">新的一桌</button><button id="retrySave" class="ghost" hidden>重试保存</button>
         </div>
       </div>
     </main>
@@ -183,8 +184,8 @@
     </div>
   </div>
 
-  <div id="toast" class="toast"></div>
-  <script src="/app.js"></script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js?v=20261105-desktop"></script>
   <script>
     // 注册 Service Worker —— PWA 可安装 + 离线外壳（策略见 sw.js，network-first 不吃旧缓存）
     if ("serviceWorker" in navigator) {

@@ -28,24 +28,54 @@ let pendingDivination = ""; // 起卦/抽牌结果，随下条消息发送
 const IS_DESKTOP = new URLSearchParams(location.search).get("surface") === "desktop"
   || window.matchMedia("(display-mode: standalone)").matches
   || window.navigator.standalone === true;   // iOS Safari 加到主屏
-async function init(){
-  if(IS_DESKTOP) document.body.classList.add("surface-desktop");  // 工作台形态，非展厅落地页
-  bindUI();
-  if(!IS_DESKTOP) mountLandingAscii();   // 桌面端不展示横向展厅首页，省去远山动画/雾气计时器
-  await loadPersonas();
-  loadHistory();
-  if(IS_DESKTOP) enterHall();            // 桌面端：开窗即进入工作台（像 VS Code/Linear，无营销首页）
+async function readJSON(path, options){
+  const response=await fetch(path,options);
+  if(!response.ok) throw new Error('request-failed');
+  return response.json();
+}
+async function loadHealth(){
   try{
-    const h = await (await fetch("/api/health")).json();
-    $("#modelTag").textContent = h.llm_configured ? `模型 · ${h.model}` : "⚠ 未配置 API key";
-  }catch{}
+    const h=await readJSON('/api/health');
+    $("#serviceTag").textContent=h.llm_configured?'议事服务已就绪':'议事服务待配置';
+    if(!h.llm_configured)showConnectionError('议事服务尚未就绪。可以先选角色，服务就绪后再开始讨论。');
+  }catch{ $("#serviceTag").textContent='服务暂时无法连接'; showConnectionError('暂时无法连接本地服务，请确认程序仍在运行。'); }
+}
+async function init(){
+  if(IS_DESKTOP)document.body.classList.add('surface-desktop');
+  bindUI();
+  if(!IS_DESKTOP)mountLandingAscii();
+  if(IS_DESKTOP)enterHall();
+  await Promise.allSettled([loadPersonas(),loadHistory(),loadHealth()]);
+}
+function rosterState(title,message,retry=false){
+  const roster=$("#roster");roster.innerHTML='';
+  const state=document.createElement('div');state.className='roster-state';state.setAttribute('role',retry?'alert':'status');
+  const heading=document.createElement('strong');heading.textContent=title;
+  const description=document.createElement('p');description.textContent=message;
+  state.append(heading,description);
+  if(retry){const button=document.createElement('button');button.type='button';button.textContent='重新读取名录';button.onclick=loadPersonas;state.appendChild(button);}
+  roster.appendChild(state);
+  const track=$("#sageTrack");if(track){track.innerHTML='';const copy=state.cloneNode(true);if(retry)copy.querySelector('button').onclick=loadPersonas;track.appendChild(copy);}
+}
+async function loadPersonas(){
+  rosterState('正在请入群贤','读取人物名录与讨论视角。');
+  try{
+    const result=await readJSON('/api/personas');
+    if(!Array.isArray(result))throw new Error('invalid-roster');
+    personas=result;
+    if(!personas.length){rosterState('名录暂时留白','请检查人物文件后重新读取。',true);return;}
+    renderRoster();
+    $("#rosterSearch").oninput=e=>renderRoster(e.target.value);
+    void buildHome();
+  }catch{rosterState('暂时无法读取名录','请确认本地服务仍在运行，然后重试。',true);}
 }
 
-async function loadPersonas(){
-  personas = await (await fetch("/api/personas")).json();
+function renderRoster(query = ""){
   const r = $("#roster"); r.innerHTML = "";
+  const needle = query.trim().toLocaleLowerCase();
+  const matches = personas.filter(p => [p.name, p.aka, p.school, CAT[p.category]?.label].join(" ").toLocaleLowerCase().includes(needle));
   const order = ["east","west","metaphysics","modern","leader"];
-  const byCat = {}; personas.forEach(p => (byCat[p.category] ||= []).push(p));
+  const byCat = {}; matches.forEach(p => (byCat[p.category] ||= []).push(p));
   let n = 0;
   order.forEach(cat => {
     if(!byCat[cat]) return;
@@ -56,7 +86,13 @@ async function loadPersonas(){
     r.appendChild(lab);
     byCat[cat].forEach(p => r.appendChild(card(p)));
   });
-  buildHome();
+  if(!matches.length){
+    const empty = document.createElement("p");
+    empty.className = "roster-empty";
+    empty.textContent = "没有匹配的智者，试试名字或流派。";
+    r.appendChild(empty);
+  }
+  renderSelection();
 }
 
 // ── 首页·横向展厅：每位智者一件"展品"（ASCII 像水墨洇边 + 朱印角标）──
@@ -130,14 +166,17 @@ function card(p){
   const el = document.createElement("div");
   el.className = "p-card"; el.dataset.id = p.id;
   el.innerHTML = `
+    <button type="button" class="persona-pick" aria-label="选择${p.name}" aria-pressed="${selected.includes(p.id)}">
     <div class="seal">${sealInner(p.id, p.name)}</div>
     <div class="p-info">
       <div class="p-name">${p.name}${akaSpan(p,"p-aka")}</div>
       <div class="p-school">${p.school}</div>
     </div>
+    </button>
     <button class="info-btn" title="了解此人">详</button>
     <span class="cat-dot" style="background:${CAT[p.category]?.color||'#bbb'}"></span>`;
   el.onclick = () => toggle(p.id);
+  el.querySelector(".persona-pick").onclick = e => { e.stopPropagation(); toggle(p.id); };
   el.querySelector(".info-btn").onclick = e => { e.stopPropagation(); openDetail(p.id); };
   return el;
 }
@@ -163,14 +202,17 @@ function toggle(id){
 }
 
 function renderSelection(){
-  document.querySelectorAll(".p-card").forEach(c =>
-    c.classList.toggle("sel", selected.includes(c.dataset.id)));
+  document.querySelectorAll(".p-card").forEach(c => {
+    const chosen = selected.includes(c.dataset.id);
+    c.classList.toggle("sel", chosen);
+    c.querySelector(".persona-pick")?.setAttribute("aria-pressed", String(chosen));
+  });
   const bar = $("#selectedBar"); bar.innerHTML = "";
   selected.forEach(id => {
     const p = personas.find(x=>x.id===id); if(!p) return;
     const chip = document.createElement("span");
     chip.className = "chip";
-    chip.innerHTML = `<span class="seal">${sealInner(p.id, p.name)}</span>${p.name}<span class="x">×</span>`;
+    chip.innerHTML = `<span class="seal">${sealInner(p.id, p.name)}</span>${p.name}<button type="button" class="x" aria-label="移除${p.name}">×</button>`;
     chip.querySelector(".x").onclick = () => toggle(id);
     bar.appendChild(chip);
   });
@@ -198,6 +240,7 @@ function renderDivBar(){
 
 // ── 模式切换 ──
 function bindUI(){
+  $("#retrySave").onclick=autosave;
   document.querySelectorAll(".mode").forEach(b => b.onclick = () => {
     document.querySelectorAll(".mode").forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
@@ -209,6 +252,7 @@ function bindUI(){
   const ta = $("#input");
   ta.addEventListener("input", () => { ta.style.height="auto"; ta.style.height=Math.min(ta.scrollHeight,160)+"px"; });
   ta.addEventListener("keydown", e => {
+    if(e.isComposing || e.keyCode === 229) return;
     if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(); }
   });
   $("#sendBtn").onclick = () => streaming ? stopGen() : send();
@@ -225,11 +269,20 @@ function bindUI(){
   $("#menuEnter") && $("#menuEnter").addEventListener("click", e => { e.preventDefault(); enterHall(); setTimeout(()=>$("#input")?.focus(),300); });
   $("#detailClose").onclick = closeDetail;
   $("#detail").onclick = e => { if(e.target.id==="detail") closeDetail(); };
-  $("#menuBtn") && ($("#menuBtn").onclick = () => $(".sidebar").classList.toggle("open"));
+  $("#menuBtn") && ($("#menuBtn").onclick = () => {
+    const open = $(".sidebar").classList.toggle("open");
+    $("#menuBtn").setAttribute("aria-expanded", String(open));
+  });
   $("#reflectSave").onclick = () => { const r=$("#reflectText").value; closeReflect(); exportNote(r); };
   $("#reflectSkip").onclick = () => { closeReflect(); exportNote(""); };
   $("#reflect").onclick = e => { if(e.target.id==="reflect") closeReflect(); };
-  document.addEventListener("keydown", e => { if(e.key==="Escape"){ closeDetail(); closeReflect(); $("#homeMenu")?.classList.remove("open"); } });
+  document.addEventListener("keydown", e => { if(e.key==="Escape"){
+    closeDetail(); closeReflect(); $("#homeMenu")?.classList.remove("open");
+    const sidebar = $(".sidebar");
+    const restoreMenuFocus = sidebar?.classList.contains("open") && sidebar.contains(document.activeElement);
+    sidebar?.classList.remove("open"); $("#menuBtn")?.setAttribute("aria-expanded", "false");
+    if (restoreMenuFocus) $("#menuBtn")?.focus();
+  } });
 }
 
 // ── 自动择贤 ──
@@ -255,6 +308,7 @@ async function send(){
   if(!text) return;
   if(selected.length===0) return toast(mode==="solo"?"请先选一位智者":"请先选至少两位智者");
   if(mode!=="solo" && selected.length<2) return toast("圆桌/抉择至少需要两位智者");
+  $("#connectionStatus").classList.remove("show");
 
   $("#empty")?.remove();
   $("#input").value=""; $("#input").style.height="auto";
@@ -271,7 +325,8 @@ async function send(){
 
   try{
     const resp = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({mode, persona_ids:selected, messages:convo, divination:divin, model:($("#modelSel")?.value||"")}), signal:controller.signal});
+      body:JSON.stringify({mode, persona_ids:selected, messages:convo, divination:divin}), signal:controller.signal});
+    if(!resp.ok) throw new Error(`服务返回 ${resp.status}，请稍后重试。`);
     const reader = resp.body.getReader();
     const dec = new TextDecoder();
     let sseBuf="";
@@ -292,29 +347,45 @@ async function send(){
         }else if(ev.type==="end"){
           curBody?.classList.remove("cursor"); flush();
         }else if(ev.type==="error"){
-          toast("出错：" + ev.message);
+          showConnectionError(ev.message);
         }
       }
     }
   }catch(e){
-    if(e.name!=="AbortError") toast("连接中断：" + e.message);
+    if(e.name!=="AbortError") showConnectionError("连接中断：" + e.message);
   }
   flush();                               // 中途停止也保住已生成内容
   curBody?.classList.remove("cursor");
+  if(curBody && !buf.trim()) curBody.closest(".msg")?.remove();
   streaming=false; controller=null; setBusy(false);
   $("#exportBtn").disabled = convo.filter(m=>m.role==="assistant").length===0;
   autosave();                            // 每轮自动落库：没导出也不丢
 }
 
+function showConnectionError(message){
+  const box=$("#connectionStatus");
+  box.textContent=message; box.classList.add("show");
+}
+
 // 每轮结束自动保存（滚动更新同一行），不依赖导出
-async function autosave(){
-  if(!convo.some(m=>m.role==="assistant")) return;
-  const title=(convo.find(m=>m.role==="user")?.content||"解惑").slice(0,18);
-  try{
-    const r=await (await fetch("/api/session/save",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({session_id:currentSession, mode, title, persona_ids:selected, messages:convo})})).json();
-    if(r&&r.id){ currentSession=r.id; loadHistory(); }
-  }catch{}
+let autosaveQueue=Promise.resolve();
+function autosave(){
+  const conversation=convo;
+  autosaveQueue=autosaveQueue.catch(()=>{}).then(async()=>{
+    if(conversation!==convo || !convo.some(message=>message.role==='assistant'))return;
+    const status=$("#saveStatus");status.hidden=false;status.className='save-status';status.textContent='正在保存这次讨论…';$("#retrySave").hidden=true;
+    const title=(convo.find(message=>message.role==='user')?.content||'解惑').slice(0,18);
+    try{
+      const result=await readJSON('/api/session/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:currentSession,mode,title,persona_ids:selected,messages:convo})});
+      if(!result?.id)throw new Error('missing-save-receipt');
+      if(conversation!==convo)return;
+      currentSession=result.id;status.textContent='已保存在本机 · 可从「近日所思」继续';void loadHistory();
+    }catch{
+      if(conversation!==convo)return;
+      status.className='save-status failed';status.textContent='暂未保存成功。当前讨论仍保留在此页，请重试后再关闭。';$("#retrySave").hidden=false;
+    }
+  });
+  return autosaveQueue;
 }
 
 function stopGen(){ try{ controller?.abort(); }catch{} toast("已停止"); }
@@ -378,16 +449,20 @@ async function exportNote(reflection){
   }catch{ toast("导出失败"); }
 }
 async function loadHistory(){
+  const history=$("#history");history.setAttribute('aria-busy','true');
   try{
-    const list = await (await fetch("/api/sessions")).json();
-    const h=$("#history"); h.innerHTML="";
-    list.slice(0,15).forEach(s=>{
-      const el=document.createElement("div"); el.className="h-item";
-      el.textContent=`${s.title||"无题"}`; el.title=`${s.created} · ${s.mode}（点击回看）`;
-      el.onclick=()=>loadSession(s.id);
-      h.appendChild(el);
+    const list=await readJSON('/api/sessions');
+    if(!Array.isArray(list))throw new Error('invalid-history');
+    history.innerHTML='';
+    list.slice(0,15).forEach(session=>{
+      const button=document.createElement('button');button.type='button';button.className='h-item';button.textContent=session.title||'无题';button.title=`${session.created} · ${session.mode}（点击回看）`;button.onclick=()=>loadSession(session.id);history.appendChild(button);
     });
-  }catch{}
+  }catch{
+    history.innerHTML='';
+    const state=document.createElement('div');state.className='history-error';state.setAttribute('role','alert');
+    const text=document.createElement('span');text.textContent='暂时无法读取近日所思。';
+    const retry=document.createElement('button');retry.type='button';retry.textContent='重试';retry.onclick=loadHistory;state.append(text,retry);history.appendChild(state);
+  }finally{history.setAttribute('aria-busy','false');}
 }
 const MODE_BACK={"独对":"solo","圆桌":"roundtable","抉择":"council"};
 async function loadSession(id){
@@ -410,7 +485,7 @@ async function loadSession(id){
       }
     });
     $("#exportBtn").disabled = !convo.some(m=>m.role==="assistant");
-    $("#landing").classList.add("entered");
+    enterHall();
     $(".sidebar").classList.remove("open");
     scroll();
   }catch{ toast("无法载入该会话"); }
@@ -447,6 +522,7 @@ function showDivination(kind,text){
 }
 
 function resetThread(){
+  $("#saveStatus").hidden=true; $("#retrySave").hidden=true;
   convo=[]; currentSession=null; streaming=false;   // 新对话 = 新的一行
   $("#thread").innerHTML=`<div class="empty" id="empty">
     <div class="empty-seal">問</div>

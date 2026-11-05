@@ -3,7 +3,7 @@
  * 策略：network-first（先网络、失败回退缓存）——刻意不做 cache-first，
  * 免得改了 app.js/style.css 后吃旧缓存（开发期那个老坑）。/api/* 一律直连不缓存。
  */
-const CACHE = "council-shell-v1";
+const CACHE = "council-shell-v7-recovery";
 const SHELL = ["/", "/index.html", "/style.css", "/app.js",
                "/manifest.webmanifest",
                "/icons/icon-192.png", "/icons/icon-512.png"];

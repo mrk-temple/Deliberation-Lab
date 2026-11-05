@@ -1,5 +1,13 @@
 # Deliberation-Lab
 
+## 源码版使用说明 · 2026-11-05
+
+Python 3.10+：`python -m pip install -r web/requirements.txt`，复制 `config.example.yaml` 为 `config.yaml`，复制 `web/.env.example` 为 `web/.env`；在 `web` 内运行 `python -m uvicorn app:app --host 127.0.0.1 --port 8787`。
+
+未配置模型时可看界面，聊天会明确提示服务未配置。人物为模拟视角；个人聊天、Obsidian 路径和评测运行记录不发布。
+
+本次检查：6 项后端测试和前端脚本语法检查通过。 详细范围见 [验证与后续工作](RELEASE_CHECK.md)。敏感信息规则见 [SECURITY.md](SECURITY.md)。
+
 > 迷茫、纠结、想不通时，请历史上的智者帮你看通看透。
 
 Deliberation-Lab 是一个**多智能体角色扮演**系统：15 位古今智者（老子、庄子、孔子、王阳明、苏轼、苏格拉底、马可·奥勒留、尼采、加缪、荣格、纳瓦尔、费曼、毛泽东、易经、塔罗）各有**一份结构化"灵魂档案"**，而非写死的 prompt。围绕同一套人物库，提供三种对话模式，每次解惑沉淀成一篇笔记写进 Obsidian。
@@ -10,14 +18,14 @@ Deliberation-Lab 是一个**多智能体角色扮演**系统：15 位古今智�
 
 ## 界面预览
 
-![首页展厅](docs/screenshot.png)
+界面由 `web/static/` 提供；可启动服务后查看。
 
 > 首页是横向"展厅"：每位智者一件展品（ASCII 水墨像），点「请教」进入对话。可安装为 PWA 独立窗口。
 > （截图请自行截取首页后放到 `docs/screenshot.png`，分辨率建议 1440×950。）
 
 ## 快速开始（Web）
 
-要求：**Python 3.10+** 和 **DeepSeek API Key**（OpenAI 兼容）。
+要求：**Python 3.10+** 和 **MiMo API Key**（OpenAI 兼容）。
 
 ```bash
 cd web
@@ -28,13 +36,13 @@ cd web
 **配置 API Key**：复制 `web/.env.example` 为 `web/.env` 并填入：
 
 ```bash
-DEEPSEEK_API_KEY=sk-...
-DEEPSEEK_BASE_URL=https://api.deepseek.com
+MIMO_API_KEY=your-key
+MIMO_BASE_URL=https://api.xiaomimimo.com/v1
 ```
 
 不填也能启动——服务会尝试从环境变量读取；`/api/health` 返回 `llm_configured: false` 时表示 key 缺失。
 
-**停止**：终端里 `Ctrl+C`；或 `pkill -f uvicorn`。
+**停止**：在启动服务的终端里按 `Ctrl+C`。
 
 > Windows + WSL 用户：仓库里附有 `启动解惑议事厅.bat` / `停止解惑议事厅.bat`，双击即用（记得改脚本里的项目路径）。
 
@@ -73,7 +81,7 @@ DEEPSEEK_BASE_URL=https://api.deepseek.com
 - 10 个决策评测场景（个人抉择 / 多方辩论 / 复杂 trade-off）
 - 5 维评分标准：角色一致性、Pushback 力度、结论可执行性、长程一致性、方法运用度
 - LLM-as-Judge + 规则检查的自动打分，Trace 全量采集
-- 对比 **GLM-5.2 vs DeepSeek-V4-Pro** 两种后端（运行时切换，零侵入）
+- 对比 **GLM-5.2 vs MiMo-V4-Pro** 两种后端（运行时切换，零侵入）
 - Badcase 分类挖掘 + 失败样本**回流到角色档案**并验证改善
 
 详见 [multiagent-eval/README.md](multiagent-eval/README.md)。评测曾发现并修复一个有趣 bug：角色 ID 命名不一致导致马可·奥勒留被静默过滤。
@@ -88,7 +96,7 @@ Deliberation-Lab/
 ├── web/                 # L2 Web 主力交付（FastAPI + 原生前端）
 │   ├── app.py           #   FastAPI：/api/chat(SSE) /api/suggest /api/export /api/sessions
 │   ├── orchestrator.py  #   编排引擎：三种模式 + 辩论导演 + 蒸馏
-│   ├── llm.py           #   OpenAI 兼容后端（DeepSeek）
+│   ├── llm.py           #   OpenAI 兼容后端（MiMo）
 │   ├── personas.py      #   解析 personas/*.md → 结构化人物
 │   ├── store.py         #   SQLite 会话 + 导出 Obsidian
 │   └── static/          #   水墨×ASCII 前端（SSE 流式渲染）
@@ -109,7 +117,7 @@ L0 人物库   每人一份灵魂档案（世界观/方法/语气/源典/局限�
 
 ## 技术栈
 
-**后端**：Python · FastAPI · SSE 流式 · SQLite · OpenAI 兼容 API（默认 DeepSeek，可换任意 OpenAI 兼容服务）
+**后端**：Python · FastAPI · SSE 流式 · SQLite · OpenAI 兼容 API（默认 MiMo，可换任意 OpenAI 兼容服务）
 **前端**：原生 HTML/CSS/JS（零构建），水墨 × 古典 × ASCII 视觉
 **编排**：单 LLM 多次调用 + 脚本化状态编排（每位智者一次独立调用，transcript 作为上下文传递）
 

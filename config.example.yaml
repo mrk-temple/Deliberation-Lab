@@ -1,0 +1,33 @@
+# Deliberation-Lab · 配置
+# skill 读这里解析 vault 路径与输出目录。改路径只改这里。
+
+# Obsidian vault 根目录（与 personal-infoflow 共用）
+vault_path: "./notes"
+
+# 每次解惑笔记写到哪个目录（vault 内）
+output_dir: "./notes/解惑议事厅"
+
+# 圆桌默认人数（用户没指定时，主持人选几位上桌）
+roundtable_default_size: 4
+
+# 默认模式：当用户只抛困惑、没说要单聊还是群聊时，主持人怎么默认
+# 可选：ask（先问用户）/ council（直接走抉择模式，给可落地结论）
+default_mode: ask
+
+# ── 以下供 web 后端使用（skill 阶段用不到） ──
+
+# 大语言模型：OpenAI 兼容接口（MiMo）。
+# key 从进程环境或 web/.env 读取，不复用其他供应商凭据。
+llm:
+  base_url_env: MIMO_BASE_URL
+  api_key_env: MIMO_API_KEY
+  base_url_default: "https://api.xiaomimimo.com/v1"
+  model: "mimo-v2.6-flash"
+  temperature: 0.85
+  max_tokens: 1200
+
+# web 服务
+web:
+  host: "127.0.0.1"
+  port: 8787
+  db_path: "web/council.db"           # 相对仓库根；存历史会话

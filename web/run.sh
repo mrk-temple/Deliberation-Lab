@@ -12,12 +12,6 @@ if [[ ! -d "$VENV" ]]; then
   "$VENV/bin/pip" install -q -r requirements.txt
 fi
 
-# 没有 web/.env 时，复用 infoflow 的 DeepSeek key（不复制密钥，只在运行时读取）
-INFOFLOW_ENV="/mnt/e/Projects/idea/信息流+个人画像+日报反馈_agent-skill/personal-infoflow/.env"
-if [[ ! -f "$HERE/.env" && -f "$INFOFLOW_ENV" ]]; then
-  echo "用 infoflow 的 DeepSeek key 运行（如需独立配置，复制 .env.example 为 .env）"
-fi
-
 HOST="${HOST:-127.0.0.1}"
 PORT="${PORT:-8787}"
 echo "解惑议事厅 → http://$HOST:$PORT"
